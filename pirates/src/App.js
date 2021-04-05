@@ -3,6 +3,8 @@ import Header from "./components/Header";
 import Pirate from "./components/Pirate";
 import AddPirate from "./components/AddPirate";
 
+import piratesFile from "./data/sample-pirates-array";
+
 import firebase from "./firebase";
 
 const pirateCalls = [
@@ -20,6 +22,10 @@ function App() {
   React.useEffect(() => {
     getPirates();
   }, []);
+
+  const loadSamples = () => {
+    piratesFile.forEach((pirate) => addPirate(pirate));
+  };
 
   const getPirates = () => {
     const pirateRef = firebase.database().ref("pirates");
@@ -48,7 +54,7 @@ function App() {
       <Header title={randomize()} />
       <div className="pirate">
         <AddPirate addPirate={addPirate} />
-
+        <button onClick={loadSamples}>Load Samples</button>
         {pirates.length === 0 ? (
           <p>Add some pirates.</p>
         ) : (

@@ -1180,30 +1180,27 @@ Create `firebase.js` in `src`:
 
 ```js
 import firebase from "firebase/app";
-import "firebase/firestore";
+import "firebase/database";
 
-firebase.initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyC1yCzyIdwEDTha8YPLDqyTMxKPzIy0lrE",
   authDomain: "pirates-31599.firebaseapp.com",
+  databaseURL: "https://pirates-31599-default-rtdb.firebaseio.com",
   projectId: "pirates-31599",
   storageBucket: "pirates-31599.appspot.com",
   messagingSenderId: "79434369957",
   appId: "1:79434369957:web:79f3f3b74964f5eb87f64c",
-});
-
-let db = firebase.firestore();
-
-export default {
-  firebase,
-  db,
 };
+
+firebase.initializeApp(firebaseConfig);
+
+export default firebase;
 ```
 
 Import it into App.js:
 
 ```js
 // import piratesFile from "./data/sample-pirates-array";
-
 import firebase from "./firebase";
 ```
 
@@ -1213,39 +1210,78 @@ And reset the pirates state to an empty array:
 const [pirates, setPirates] = React.useState([]);
 ```
 
-Use the lifecycle methods to sync to the database in App.js:
+In App.js:
 
 ```js
-React.useEffect(() => {
-  getPirates();
-}, []);
+import React from "react";
+import Header from "./components/Header";
+import Pirate from "./components/Pirate";
+import AddPirate from "./components/AddPirate";
 
-const getPirates = () => {
-  firebase.db
-    .collection("pirates")
-    .get()
-    .then((pirates) => {
-      pirates.forEach((doc) => {
-        setPirates((prev) => [...prev, doc.data()]);
-      });
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
-};
+import firebase from "./firebase";
 
-const addPirate = (pirate) => {
-  firebase.db
-    .collection("pirates")
-    .add(pirate)
-    .then(async (documentReference) => {
-      console.log("document reference ID", documentReference.id);
-      getPirates();
-    })
-    .catch((error) => {
-      console.log(error.message);
+const pirateCalls = [
+  "Aaarg, belay that!",
+  "Avast me hearties!",
+  "Shiver me timbers!",
+];
+
+const randomize = () =>
+  pirateCalls[Math.floor(Math.random() * pirateCalls.length)];
+
+function App() {
+  const [pirates, setPirates] = React.useState([]);
+
+  React.useEffect(() => {
+    getPirates();
+  }, []);
+
+  const getPirates = () => {
+    const pirateRef = firebase.database().ref("pirates");
+    pirateRef.on("value", (snapshot) => {
+      const pirates = snapshot.val();
+      const pirateList = [];
+      for (let id in pirates) {
+        pirateList.push({ id, ...pirates[id] });
+      }
+      setPirates(pirateList);
     });
-};
+  };
+
+  const addPirate = (pirate) => {
+    const pirateRef = firebase.database().ref("pirates");
+    pirateRef.push(pirate);
+  };
+
+  const removePirate = (pirate) => {
+    const pirateRef = firebase.database().ref("pirates").child(pirate);
+    pirateRef.remove();
+  };
+
+  return (
+    <div>
+      <Header title={randomize()} />
+      <div className="pirate">
+        <AddPirate addPirate={addPirate} />
+
+        {pirates.length === 0 ? (
+          <p>Add some pirates.</p>
+        ) : (
+          pirates.map((pirate) => (
+            <Pirate
+              key={pirate.name}
+              tagline={randomize()}
+              pirate={pirate}
+              removePirate={removePirate}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
 ```
 
 Create a pirate to test.
@@ -1253,22 +1289,24 @@ Create a pirate to test.
 Create a method in App.js:
 
 ```js
-loadSamples = () => {
-  this.setState({ pirates: piratesFile });
+import piratesFile from "./data/sample-pirates-array";
+...
+const loadSamples = () => {
+  piratesFile.forEach((pirate) => addPirate(pirate));
 };
 ```
 
 Create a button below the header in App.js:
 
 ```js
-<button onClick={this.loadSamples}>Load Samples</button>
+<button onClick={loadSamples}>Load Samples</button>
 ```
 
 And test.
 
-## Notes
+## Instructor Notes
 
-## Build a Site
+## Serverless Functions
 
 1. Install node-fetch, netlify-cli
 
@@ -1291,5 +1329,13 @@ exports.handler = async () => {
   };
 };
 ```
+
+## Firebase
+
+https://dev.to/chensokheng/crud-operation-react-firebase-realtime-database-1bkn
+
+https://dev.to/bnevilleoneill/react-hooks-with-firebase-firestore-3onk
+
+https://console.firebase.google.com/u/0/project/pirates-31599/database/pirates-31599-default-rtdb/data/~2F
 
 ---
