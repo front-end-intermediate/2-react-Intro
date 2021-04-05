@@ -2,7 +2,6 @@ import React from "react";
 import Header from "./components/Header";
 import Pirate from "./components/Pirate";
 import AddPirate from "./components/AddPirate";
-// import piratesFile from "./data/sample-pirates-array";
 
 import firebase from "./firebase";
 
@@ -23,47 +22,26 @@ function App() {
   }, []);
 
   const getPirates = () => {
-    firebase.db
-      .collection("pirates")
-      .get()
-      .then((pirates) => {
-        pirates.forEach((doc) => {
-          setPirates((prev) => [...prev, doc.data()]);
-        });
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+    const pirateRef = firebase.database().ref("pirates");
+    pirateRef.on("value", (snapshot) => {
+      const pirates = snapshot.val();
+      const pirateList = [];
+      for (let id in pirates) {
+        pirateList.push({ id, ...pirates[id] });
+      }
+      setPirates(pirateList);
+    });
   };
-
-  // const addPirate = (pirate) => {
-  //   setPirates((prev) => [...prev, pirate]);
-  // };
 
   const addPirate = (pirate) => {
-    firebase.db
-      .collection("pirates")
-      .add(pirate)
-      .then(async (documentReference) => {
-        console.log("document reference ID", documentReference.id);
-        getPirates();
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
+    const pirateRef = firebase.database().ref("pirates");
+    pirateRef.push(pirate);
   };
 
-  // const removePirate = (pirateName) => {
-  //   const newPirates = pirates.filter((pirate) => pirate.name !== pirateName);
-  //   setPirates(newPirates);
-  // };
-
-  const removePirate = (pirateName) => {
-    console.log("  ", firebase.db.collection("pirates"));
-    firebase.db.collection("pirates").doc(pirateName).delete();
+  const removePirate = (pirate) => {
+    const pirateRef = firebase.database().ref("pirates").child(pirate);
+    pirateRef.remove();
   };
-
-  // const res = await db.collection('cities').doc('DC').delete();
 
   return (
     <div>
