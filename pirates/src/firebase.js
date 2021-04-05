@@ -1,12 +1,10 @@
 import firebase from "firebase/app";
 import "firebase/database";
 
-import Config from "./config.json";
-
 const firebaseConfig = {
-  apiKey: Config.API_KEY,
-  databaseURL: Config.DATABASE_URL,
-  projectId: Config.PROJECT_ID,
+  apiKey: "AIzaSyC1yCzyIdwEDTha8YPLDqyTMxKPzIy0lrE",
+  databaseURL: "https://pirates-31599-default-rtdb.firebaseio.com",
+  projectId: "pirates-31599",
 };
 
 if (!firebase.apps.length) {
