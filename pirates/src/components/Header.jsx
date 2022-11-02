@@ -1,10 +1,11 @@
-import React from "react";
+import logo from "../assets/img/anchor.svg";
+import "../assets/css/Header.css";
 
-function Header() {
+function Header({ title }) {
   return (
     <div className="header">
-      {/* <img src={logo} className="logo" alt="logo" /> */}
-      <h1>FooBar</h1>
+      <img src={logo} className="logo" alt="logo" />
+      <h1>{title}</h1>
     </div>
   );
 }
