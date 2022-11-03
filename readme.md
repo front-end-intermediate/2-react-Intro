@@ -343,7 +343,7 @@ Import Header and render it to the DOM via App.js while passing it a title prop:
 
 ```js
 import React from "react";
-import Header from "./Header";
+import Header from "./components/Header";
 
 function App() {
   return (
@@ -583,7 +583,7 @@ You should be familiar with class components - they have been the primary method
 Import an array of sample pirates into `App.js` and open the file in the editor to examine it:
 
 ```js
-import piratesFile from "../data/sample-pirates-array";
+import piratesFile from "./data/sample-pirates-array";
 ```
 
 In `App.js` create multiple pirates using `.map()`:
@@ -626,7 +626,7 @@ In `Pirate.js` we access the data via props:
 function Pirate(props) {
   return (
     <section>
-      <h2>{props.pirate.name}</h2>
+      <h2>{props.name}</h2>
       <p>Favorite saying: {props.tagline}</p>
     </section>
   );
@@ -689,28 +689,24 @@ When you update your data/state, your framework renders a new copy of the UI bas
 
 Under the hood React uses a virtual DOM to invisibly render components. Then it compares the actual DOM to the virtual DOM and performs a "diff" - an analyses of the differences between the two. Afterwards it surgically updates only those portions of the actual DOM that need to be updated. The entire page is never refereshed.
 
-[Sample](https://codepen.io/pen?&editors=0010)
-
 - state is internal and controlled by the component itself
 - props are external and controlled by whatever component renders the component
 - props always flow down the document tree, never up
 
 We will be using React hooks to manage state in our app.
 
-`ussState` returns an array with two elements which we destructure into two variables. The first being the data and the second a function to update the data:
+`ussState` returns an array with two elements which we destructure into two variables. The first being the data and the second a function to update the data.
 
----
-
-### STATE DEMO on codesandbox.io
+Create a the following as `State.jsx` in the components directory:
 
 ```js
 import React from "react";
-import "./styles.css";
 
-export default function App() {
+export default function Test() {
+  // HERE
   const [steps, setSteps] = React.useState(0);
 
-  // unlike our randomize function this needs to be part of the component
+  // unlike our randomize function this needs to be part inside the component definition
   function increment() {
     setSteps((steps) => steps + 1);
   }
@@ -719,13 +715,14 @@ export default function App() {
     <div>
       Today you've taken {steps} steps!
       <br />
+      {/* Note: not increment() */}
       <button onClick={increment}>I took another step</button>
     </div>
   );
 }
 ```
 
-<!-- END STATE DEMO -->
+Import it into App and compose it.
 
 ---
 
@@ -747,7 +744,7 @@ function App() {
 }
 ```
 
-Note: `{pirates.map((pirate) => (` - we are initializing the pirates state with piratesFile
+Note: `{pirates.map((pirate) => (` - we are now initializing the pirates state with piratesFile in state.
 
 Import an avatar in Pirate.js:
 
@@ -770,7 +767,7 @@ function Pirate(props) {
       </summary>
       <article>
         <h2>{props.tagline}</h2>
-        <p>{props.pirate.description}</p>
+        <p>{props.pirate.desc}</p>
       </article>
     </section>
   );
@@ -781,7 +778,7 @@ Destructure the variables from this.props:
 
 ```js
 function Pirate(props) {
-  const { name, year, weapon, vessel, description } = props.pirate;
+  const { name, year, weapon, vessel, desc } = props.pirate;
   const { tagline } = props;
 
   return (
@@ -797,10 +794,36 @@ function Pirate(props) {
       </summary>
       <article>
         <h2>{tagline}</h2>
-        <p>{description}</p>
+        <p>{desc}</p>
       </article>
     </section>
   );
+}
+```
+
+Edit Pirate.css:
+
+```css
+.pirate {
+  max-width: 80vw;
+  margin: 2rem auto;
+}
+
+h2 {
+  font-family: "Trade Winds", cursive;
+}
+
+section {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted black;
+  margin-bottom: 1rem;
+}
+
+article {
+  flex: 1;
 }
 ```
 
@@ -808,7 +831,7 @@ Refine the destructuring:
 
 ```js
 function Pirate({ pirate, tagline }) {
-  const { name, year, weapon, vessel, description } = pirate;
+  const { name, year, weapon, vessel, desc } = pirate;
   ...
 }
 ```
@@ -817,7 +840,7 @@ Another possible refinement:
 
 ```js
 function Pirate({
-  pirate: { name, year, weapon, vessel, description },
+  pirate: { name, year, weapon, vessel, desc },
   tagline,
 }) {
 ...
@@ -831,7 +854,7 @@ const pirates = [
   {
     name: "John Rackham",
     image: "avatar.png", // HERE
-    description:
+    desc:
       "Rackham deposed Charles Vane from his position as captain of the sloop Ranger, then cruised the Leeward Islands, Jamaica Channel and Windward Passage. He accepted a pardon in 1719 and moved to New Providence, where he met Anne Bonny. He returned to piracy in 1720 by stealing a British sloop and Anne joined him.",
     year: 1720,
     weapon: "Sword",
@@ -843,7 +866,7 @@ We can try to destructure it in the Pirate component and use it in the JSX:
 
 ```js
 function Pirate({
-  pirate: { name, year, weapon, vessel, description, image },
+  pirate: { name, year, weapon, vessel, desc, image },
   tagline,
 }) {
   return (
@@ -880,7 +903,7 @@ export default AddPirate;
 Import AddPirate and compose it in `App.js`:
 
 ```js
-import AddPirate from "./AddPirate";
+import AddPirate from "./components/AddPirate";
 ...
 function App() {
    const [pirates, setPirates] = React.useState(piratesFile);
@@ -900,7 +923,20 @@ function App() {
 
 Click on the Add Pirate submit button. The entire page reloads.
 
-Try: `<form onSubmit={(event) => event.preventDefault()}>`
+Try:
+
+```html
+<form onSubmit={(event) => event.preventDefault()}>
+```
+
+Create a function in `AddPirate`:
+
+```js
+function createPirate(event) {
+  event.preventDefault();
+  console.log("making a pirate");
+}
+```
 
 Add an onSubmit handler to the AddPirate component:
 
@@ -915,15 +951,6 @@ const AddPirate = () => {
     </form>
   );
 };
-```
-
-And create a function in `AddPirate` (this will need to go inside AddPirate function):
-
-```js
-function createPirate(event) {
-  event.preventDefault();
-  console.log("making a pirate");
-}
 ```
 
 Click on the Add Pirate button to test.
@@ -1065,7 +1092,6 @@ and call the function:
 ```js
 const createPirate = (event) => {
   event.preventDefault();
-
   const pirate = {
     name: pirateName,
     vessel: vessel,
@@ -1161,7 +1187,7 @@ Note: there will be a warning related to `keys` at this point if you submit a pr
 
 ## Removing Pirates
 
-We want the remove pirate control to be associated with each Pirate entry but our pirates state is located in the top level App component.
+We want a remove pirate function to be associated with each Pirate entry but our pirates' state is located in the top level App component.
 
 Add a stub function to `App`:
 
@@ -1191,7 +1217,7 @@ Add a button to the `Pirate` component after the description and destructure the
 
 ```js
 function Pirate({
-  pirate: { name, year, weapon, vessel, description },
+  pirate: { name, year, weapon, vessel, desc },
   tagline,
   removePirate,
 }) {
@@ -1208,7 +1234,7 @@ function Pirate({
       </summary>
       <article>
         <h2>{tagline}</h2>
-        <p>{description}</p>
+        <p>{desc}</p>
         <button onClick={removePirate}>Remove Pirate</button>
       </article>
     </section>
@@ -1218,17 +1244,13 @@ function Pirate({
 
 Test the button to ensure everything is wired correctly.
 
-```js
-const removePirate = (pirateName) => {
-  console.log(pirateName);
-};
-```
-
 In `Pirate.js`:
 
 ```js
 <button onClick={() => removePirate(name)}>Remove Pirate</button>
 ```
+
+Note that we are now passing a parameter to the function: `removePirate(name)` and we are using an arrow function: `() => removePirate(name)`. What would happen if we didn't use the function form and just used `removePirate(name)`?
 
 Add a filter to the function in App.js:
 
@@ -1251,7 +1273,7 @@ In AddPirateForm.js:
 ```js
 // add two pieces of state
   const [death, setDeath] = React.useState("");
-  const [description, setDescription] = React.useState("");
+  const [desc, setDesc] = React.useState("");
   ...
 // add the new state to the create pirate function
   const createPirate = (event) => {
@@ -1262,14 +1284,14 @@ In AddPirateForm.js:
     vessel: vessel,
     weapon: weapon,
     death: death,
-    description: description
+    desc: desc
   };
   addPirate(pirate);
   setPirateName("");
   setVessel("");
   setWeapon("");
   setDeath("");
-  setDescription("");
+  setDesc("");
 };
 ...
 // add two labels and input fields for the data
@@ -1281,16 +1303,14 @@ In AddPirateForm.js:
     value={death}
     onChange={(event) => setDeath(event.target.value)}
   />
-  <label htmlFor="description">Description</label>
+  <label htmlFor="desc">Description</label>
   <textarea
-    id="description"
+    id="desc"
     placeholder="Pirate description"
-    value={description}
-    onChange={(event) => setDescription(event.target.value)}
+    value={desc}
+    onChange={(event) => setDesc(event.target.value)}
   />
 ```
-
-## NOTES
 
 ## Persisting the data
 
@@ -1358,13 +1378,17 @@ Remove the data scaffold:
 
 `// import piratesFile from "../data/sample-pirates-array";`
 
+```js
+const [pirates, setPirates] = React.useState([]);
+```
+
 In order to use firebase we need to install their library:
 
 ```sh
 $ npm install firebase
 ```
 
-Add a piece of state to App.js:
+Edit the state in App.js:
 
 `const [pirates, setPirates] = React.useState([]);`
 
@@ -1404,7 +1428,7 @@ const addPirate = async (pirate) => {
     vessel: pirate.vessel,
     weapon: pirate.weapon,
     death: pirate.death,
-    description: pirate.description,
+    desc: pirate.desc,
     image: "avatar.png",
   });
 };
@@ -1414,7 +1438,7 @@ Create a new Pirate and look for it in Firebase.
 
 `<p>{JSON.stringify(pirates)}</p>`
 
-Fetching the pirate on initialization.
+Fetching the pirates on initialization.
 
 Add additional imports from Firestore:
 
@@ -1534,7 +1558,6 @@ Run `$ npm run build` on the command line and upload the build folder to the ser
 ### Serverless Functions
 
 1. Install node-fetch, netlify-cli
-
 1. Heroku account - create and logout
 1. Hasura cloud account > Create free project > save api info > HASURA_API_URL, ADMIN_ADMIN_SECRET
 1. Launch console > Data > create free database > pirates and recreate a pirate data schema
