@@ -4,6 +4,7 @@ import "../assets/css/Pirate.css"
 export function Pirate(props) {
   const { name, year, weapon, vessel, desc } = props.pirate
   const { tagline } = props
+  const removePirate = props.removePirate
 
   return (
     <section>
@@ -19,6 +20,7 @@ export function Pirate(props) {
       <article>
         <h2>{tagline}</h2>
         <p>{desc}</p>
+        <button onClick={() => removePirate(name)}>Remove Pirate</button>
       </article>
     </section>
   )
