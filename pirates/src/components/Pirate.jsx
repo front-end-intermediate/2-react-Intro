@@ -2,7 +2,7 @@ import avatar from "../assets/img/avatar.png"
 import "../assets/css/Pirate.css"
 
 export function Pirate(props) {
-  const { name, year, weapon, vessel, desc } = props.pirate
+  const { id, name, year, weapon, vessel, desc } = props.pirate
   const { tagline } = props
   const removePirate = props.removePirate
 
@@ -20,7 +20,7 @@ export function Pirate(props) {
       <article>
         <h2>{tagline}</h2>
         <p>{desc}</p>
-        <button onClick={() => removePirate(name)}>Remove Pirate</button>
+        <button onClick={() => removePirate(id)}>Remove Pirate</button>
       </article>
     </section>
   )
