@@ -31,7 +31,6 @@ Run the project:
 ```sh
 $ cd pirates
 $ code .
-
 ```
 
 Open VS Code's terminal and type `$ npm run start`.
@@ -311,8 +310,8 @@ A term you will hear a lot is "composition" or "compose." A key feature of React
 
 ---
 
-1. Create a `components` folder in `src` to hold our components
-1. Move the App component into the new directory and correct the import error
+1. Create a `components` folder in `src/components/` to hold our components
+1. Move the `App.js` component into the new directory and correct any import errors
 1. Create a new component `Header.js` in the components directory:
 
 ```js
@@ -330,7 +329,7 @@ function Header() {
 export default Header;
 ```
 
-Note the errors.
+Note any errors.
 
 Import the logo and some css for it at the top:
 
@@ -420,7 +419,7 @@ function App() {
 }
 ```
 
-Note: it might be more common to see an arrow function being employed.
+Note: it would be more common to see an arrow function being employed.
 
 Change the randomize function:
 
@@ -706,7 +705,7 @@ export default function Test() {
   // HERE
   const [steps, setSteps] = React.useState(0);
 
-  // unlike our randomize function this needs to be part inside the component definition
+  // unlike our randomize function this needs to be inside the component definition
   function increment() {
     setSteps((steps) => steps + 1);
   }
@@ -989,7 +988,6 @@ Create a pirate object in `AddPirate`'s `createPirate` function.
 ```js
 const createPirate = (event) => {
   event.preventDefault();
-  console.log("making a pirate");
   const pirate = {
     name: pirateName,
   };
@@ -1039,7 +1037,6 @@ Add them to the createPirate function:
 ```js
 const createPirate = (event) => {
   event.preventDefault();
-  console.log("making a pirate");
   const pirate = {
     name: pirateName,
     vessel: vessel,
@@ -1313,6 +1310,21 @@ In AddPirateForm.js:
 ```
 
 ## Persisting the data
+
+## JSON Server
+
+
+```js
+  React.useEffect(() => {
+    fetch("http://localhost:3001/pirates")
+      .then((res) => res.json())
+      .then((data) => {
+        setPirates(data);
+      });
+  }, []);
+  ```
+
+## Firebase
 
 As a finishing touch, we will connect to a backend service called [Firebase](https://firebase.google.com) to store the data.
 
