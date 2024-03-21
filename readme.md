@@ -1,22 +1,54 @@
 # React Intro
 
+- [React Intro](#react-intro)
+  - [Homework](#homework)
+  - [Suggested Reading](#suggested-reading)
+  - [Create React App](#create-react-app)
+    - [Examining the Project Structure](#examining-the-project-structure)
+    - [JSX](#jsx)
+  - [JSX requirements and features](#jsx-requirements-and-features)
+    - [Project Prep](#project-prep)
+  - [The React Developer Tool](#the-react-developer-tool)
+  - [Components](#components)
+  - [Props](#props)
+  - [DEMO Children](#demo-children)
+  - [Calling a Function](#calling-a-function)
+  - [Importing and Exporting Components](#importing-and-exporting-components)
+    - [Array.map Quick Review](#arraymap-quick-review)
+  - [Convert the Pirate component to a standalone component](#convert-the-pirate-component-to-a-standalone-component)
+  - [Aside: Class Components](#aside-class-components)
+  - [Rendering Multiple Components](#rendering-multiple-components)
+  - [State](#state)
+  - [React Forms](#react-forms)
+  - [React Forms](#react-forms-1)
+  - [Pirates State](#pirates-state)
+    - [Passing a Function as a Prop](#passing-a-function-as-a-prop)
+  - [Resetting the Form](#resetting-the-form)
+  - [Removing Pirates](#removing-pirates)
+  - [Additional Form Fields](#additional-form-fields)
+  - [Persisting the data](#persisting-the-data)
+  - [JSON Server](#json-server)
+  - [Deploying](#deploying)
+
+
 Today we will build this [minimal React site](http://react-pirates.netlify.app).
 
 <!-- with realtime database storage from Google's Firebase. -->
 
 ## Homework
 
-Add a Button.js component that takes different text and functions as props and/or children). The button should be reusable in any project (not just this one). Substitute all the buttons in our UI for your component.
+TBD.
 
 ## Suggested Reading
 
 - [The Main Concepts of React](https://reactjs.org/docs/hello-world.html)
+- [Destructuring](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
 
 ## Create React App
 
-Creating a React project requires a lot of tooling and setup. Fortunately Facebook has created a bootstrapping system called [Create React App](https://facebook.github.io/create-react-app/)
+Creating a React project requires a lot of tooling and setup. Fortunately Facebook has created a "bootstrapping" system called [Create React App](https://facebook.github.io/create-react-app/) which creates a new React project with a single command and includes a development server, a build process, and testing facilities. It will also initialize git and create a `.gitignore` file. _For this reason you may wish to avoid creating a new project in a folder that is already a git repository._
 
-To create a new project, ensure that you are cd'ed in today's project folder and run:
+To create a new project, ensure that you are cd'ed in today's (non-repository) project folder and run:
 
 <!-- --use-npm -->
 
@@ -24,9 +56,13 @@ To create a new project, ensure that you are cd'ed in today's project folder and
 $ npx create-react-app pirates
 ```
 
-Note: `npm` _manages_ packages while `npx` _executes_ Node packages. The first argument `create-react-app` is the package you are executing, the second `pirates` is the name of the project.
+Note: `npm` _manages_ packages while `npx` _executes_ Node packages. 
 
-Run the project:
+The first argument `create-react-app` is the name of the npm package you are executing, the second `pirates` is the name of the project.
+
+Be aware the CRA is not the only [option](https://hackernoon.com/create-react-app-is-dead-here-are-some-alternatives) available for creating a React project. You can also use [Vite](https://vitejs.dev/) or [Snowpack](https://www.snowpack.dev/). It just happens to be the easiest for beginners.
+
+Change directories and open the project:
 
 ```sh
 $ cd pirates
@@ -46,28 +82,31 @@ Open `index.js` from `src`.
 - This is the only place where `ReactDOM.render()` will occur:
 
 ```js
-ReactDOM.render(<App />, document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 ```
+
+`index.js` is the entry to the entire project. It imports `App` and renders it to the DOM.
 
 Open `App.js` (note the capital "A") from `src`.
 
-This is the only React component in this starter project.
+This is a React component, the only one in this starter project.
 
-Instead of using a script tag, this component imports React from the node modules folder:
-
-```js
-import React from "react";
-```
-
-`import` and `export` are part of the ES6 Module system that allows us to break down code into smaller pieces. ES6 modules are not natively supported in all browsers so a "bundler" is required. [Webpack](https://webpack.js.org/) has been installed by Create React App and is working under the hood in our project.
+`import` and `export` are part of the ES6 Module system that allows us to break down code into smaller pieces. When we are in development a "bundler" is working to manage JavaScript files in memory for speed. This feature is being provided to us via [Webpack](https://webpack.js.org/) which has been installed by Create React App and is working under the hood in our project.
 
 Webpack includes the development server that allows us to work with our site while developing. It also allows us to build or compile our site for production.
 
-The main body of the component is a function that returns JSX (_not_ HTML).
+DEMO: Run a test build and examine the contents.
+
+The main body of the component is a function that _returns_ JSX, despite appearances JSX is _not_ HTML.
 
 ### JSX
 
-Note this code:
+Note this sample code:
 
 ```js
 import React from "react";
@@ -83,7 +122,7 @@ function App() {
 export default App;
 ```
 
-You cannot have HTML in JavaScript as shown above. The portion that looks like HTML is in fact [JSX](https://reactjs.org/docs/introducing-jsx.html) and is transformed in regular JavaScript under the hood:
+You cannot use HTML in JavaScript as shown above. The portion that looks like HTML is [JSX](https://react.dev/learn/writing-markup-with-jsx) and is transformed into regular JavaScript:
 
 ```js
 import React from "react";
@@ -101,12 +140,15 @@ function App() {
 
 The library responsible for this is called [Babel](https://babeljs.io/). It was installed by Create React App. An alternative to Babel is TypeScript.
 
-JSX requirements and features:
+## JSX requirements and features
+
+Examining `App.js` we note:
 
 1. `src={logo}` - JSX curly braces allow the use of JavaScript expressions
 2. `className="App-header"` - `class` is a reserved word in JavaScript so we use the JS alternative className
 3. `<Component />` xhtml style closing tags - every element in JSX needs to be closed
-4. everything in a component must be nested in a single tag - i.e. this is not allowed:
+
+Be aware that everything returned by a component must be nested in a single tag - i.e. this is not allowed:
 
 ```js
 function App() {
@@ -117,17 +159,39 @@ function App() {
 }
 ```
 
+Instead you would need to write something like:
+
+```js
+function App() {
+  return (
+    <div>
+     <h1>Ahoy!</h1>
+     <p>Hello there</p>
+   </div>
+  )
+}
+```
+
+
 Commenting code in JSX is different than JavaScript comments and is supported in VS Code. Try commenting the following line using the `cmd-/` shortcut:
 
 `{/* <h1>Ahoy!</h1> */}`
 
 Save and note the hot reloading.
 
-Note: React 17 and above does not require you to import React so `import React from "react";` is unnecessary, however we will be doing so in this class.
-
 ### Project Prep
 
-Note: Emmet [becomes confused](https://stackoverflow.com/questions/51617570/emmet-autocomplete-is-not-functioning-in-jsx) when not using `.jsx`. Add this to your VS Code preferences:
+## The React Developer Tool
+
+Install the [React Developer Tool](https://chrome.google.com/webstore/search/react) for Chrome or Firefox and inspect the component to make sure it is working.
+
+Use the [React Developer Tool](https://chrome.google.com/webstore/search/react) to inspect:
+
+- https://www.netflix.com/ - inspect a button
+- https://www.codecademy.com/ - inspect a form field, - note the key property on repeated or 'mapped' UI elements.
+- https://www.nytimes.com/ - inspect an image
+
+Note: Emmet [may become confused](https://stackoverflow.com/questions/51617570/emmet-autocomplete-is-not-functioning-in-jsx) when not using `.jsx` extensions. Add this to your VS Code preferences:
 
 ```js
 "emmet.includeLanguages": {
@@ -169,7 +233,7 @@ Copy the material below and overwrite `public/index.html`:
 </html>
 ```
 
-### Components
+## Components
 
 All modern front end systems employ a component architecture.
 
@@ -188,18 +252,6 @@ function Pirate() {
 
 export default App;
 ```
-
-## The React Developer Tool
-
-Install the [React Developer Tool](https://chrome.google.com/webstore/search/react) for Chrome or Firefox and inspect the component to make sure it is working.
-
-Use the [React Developer Tool](https://chrome.google.com/webstore/search/react) to inspect:
-
-- https://www.netflix.com/ - inspect a button
-- https://www.codecademy.com/ - inspect a form field, - note the key property on repeated or 'mapped' UI elements.
-- https://www.nytimes.com/ - inspect an image
-
----
 
 ## Props
 
@@ -536,21 +588,14 @@ function App() {
 export default App;
 ```
 
-## A Class Component
+## Aside: Class Components
 
-So far we have only used React functional components. There is an older component type called a class component. We will focus on functional components in this class, but you should be familiar with both.
+There is an older component type called a class component. We will focus on functional components in this class, but you should have a passing familiarity with class components if only to ignore solutions and older articles that use them.
 
-A [comparison](https://reactjs.org/docs/components-and-props.html).
-
-A [complex class component](https://reactjs.org/docs/state-and-lifecycle.html#adding-lifecycle-methods-to-a-class).
-
-Comment out the current function and create a class component:
+Here is a comparison between and functional component and a class component:
 
 ```js
-import React from "react";
-import "../assets/css/Pirate.css";
-
-function Pirate(props) {
+function PirateFunc(props) {
   return (
     <section>
       <p>Favorite saying: {props.tagline}</p>
@@ -558,17 +603,15 @@ function Pirate(props) {
   );
 }
 
-// class Pirate extends React.Component {
-//   render() {
-//     return (
-//       <section>
-//         <p>Favorite saying: {this.props.tagline}</p>
-//       </section>
-//     );
-//   }
-// }
-
-export default Pirate;
+class PirateClass extends React.Component {
+  render() {
+    return (
+      <section>
+        <p>Favorite saying: {this.props.tagline}</p>
+      </section>
+    );
+  }
+}
 ```
 
 Note the render method and `this` in the paragraph. The JavaScript `this` keyword refers to the object it belongs to. Confusion around 'this' and the class-flavored syntax is a major reason the React team moved away from class to function components.
@@ -1313,6 +1356,19 @@ In AddPirateForm.js:
 
 ## JSON Server
 
+Add a new package to the project:
+
+```sh
+$ npm install json-server
+```
+
+Add a script in `package.json`:
+
+```json
+"json": "json-server pirates.json --port 3001"
+```
+
+Add the pirates.json file from the reference directory to the root of the project and run the server in a second terminal.
 
 ```js
   React.useEffect(() => {
@@ -1323,235 +1379,6 @@ In AddPirateForm.js:
       });
   }, []);
   ```
-
-## Firebase
-
-As a finishing touch, we will connect to a backend service called [Firebase](https://firebase.google.com) to store the data.
-
-<!-- https://dev.to/asayerio_techblog/build-a-crud-app-with-react-and-firebase-1651 -->
-
-The below steps can be difficult to follow and assume the creation of a todo's app. I recommend following this [video tutorial](https://youtu.be/13eja_RYimU) instead.
-
-Go to the Firebase console:
-
-![add project](reference/images/image02.png)
-
-Click Add Project:
-
-![add project](reference/images/image03.png)
-
-Give your project a name and click continue (call it pirates, not todo-app):
-
-![add project](reference/images/image04.png)
-
-You can choose to use Google Analytics or not; I choose not to. Your project will be generated, which will take some time. Then click continue.
-
-![add project](reference/images/image05.png)
-
-The dashboard below pops up once project creation is done:
-
-![add project](reference/images/image06.png)
-
-Click on the web app icon:
-
-![add project](reference/images/image07.png)
-
-After naming the web application (call it pirates), click the register app button below to access Firebase:
-
-![add project](reference/images/image08.png)
-
-Afterwards, click continue to console.:
-
-![add project](reference/images/image09.png)
-
-The dashboard pops up. Go to the project settings
-
-![add project](reference/images/image10.png)
-
-In the General tab, click on config and copy the Firebase config; it will be used to communicate to Firebase. Go to the Firestore database section, click Create Database, then this pop-up will show up:
-
-![add project](reference/images/image11.png)
-
-Click Next, choose the database location, and click enable:
-
-![add project](reference/images/image12.png)
-
-Once created, you should see this type of dashboard:
-
-![add project](reference/images/image13.png)
-
-Go to the rules and change false to true, then publish:
-
-![add project](reference/images/image14.png)
-
----
-
-Remove the data scaffold:
-
-`// import piratesFile from "../data/sample-pirates-array";`
-
-```js
-const [pirates, setPirates] = React.useState([]);
-```
-
-In order to use firebase we need to install their library:
-
-```sh
-$ npm install firebase
-```
-
-Edit the state in App.js:
-
-`const [pirates, setPirates] = React.useState([]);`
-
-Create `src/firebase.js` with:
-
-```js
-// src/firebase.js
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCIhoYmqVW1F12RSevwdL9KFnTMIte4w6c",
-  authDomain: "pirates-94dd4.firebaseapp.com",
-  databaseURL: "https://pirates-94dd4-default-rtdb.firebaseio.com",
-  projectId: "pirates-94dd4",
-  storageBucket: "pirates-94dd4.appspot.com",
-  messagingSenderId: "272025254320",
-  appId: "1:272025254320:web:acc27be6a7b4147f6c7e75",
-};
-
-// Initialize Firebase and cloud storage
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-export { db };
-```
-
-In `App.js`:
-
-```js
-import { db } from "./firebase";
-import { collection, addDoc } from "firebase/firestore";
-// ...
-const addPirate = async (pirate) => {
-  await addDoc(collection(db, "pirates"), {
-    name: pirate.name,
-    vessel: pirate.vessel,
-    weapon: pirate.weapon,
-    death: pirate.death,
-    desc: pirate.desc,
-    image: "avatar.png",
-  });
-};
-```
-
-Create a new Pirate and look for it in Firebase.
-
-`<p>{JSON.stringify(pirates)}</p>`
-
-Fetching the pirates on initialization.
-
-Add additional imports from Firestore:
-
-```js
-import { db } from "./firebase";
-import {
-  collection,
-  query,
-  onSnapshot,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
-```
-
-```js
-React.useEffect(() => {
-  const q = query(collection(db, "pirates"));
-  // const unsub =
-  onSnapshot(q, (querySnapshot) => {
-    let piratesArray = [];
-    querySnapshot.forEach((doc) => {
-      piratesArray.push({ ...doc.data(), id: doc.id });
-    });
-    setPirates(piratesArray);
-  });
-  // return () => unsub();
-}, []);
-```
-
-<!-- Import pirates functionality:
-
-```js
-// ...
-const loadSamples = () => {
-  piratesFile.forEach((pirate) => addPirate(pirate));
-};
-// ...
-<Header title={randomize()} />
-<button onClick={loadSamples}>Load Samples</button>
-``` -->
-
-Deleting pirates from Firebase.
-
-In App.js:
-
-```js
-const removePirate = async (id) => {
-  await deleteDoc(doc(db, "pirates", id));
-};
-```
-
-Pass the id to pirate:
-
-```js
-{
-  pirates.map((pirate) => (
-    <Pirate
-      // NEW
-      key={pirate.id}
-      tagline={randomize()}
-      pirate={pirate}
-      removePirate={removePirate}
-    />
-  ));
-}
-```
-
-Destructure the id and pass it to the removePirate function in App.js:
-
-```js
-function Pirate({
-  // DESTRUCTURE
-  pirate: { id, name, year, weapon, vessel, description },
-  tagline,
-  removePirate,
-}) {
-  return (
-    <section>
-      <summary>
-        <img src={avatar} alt="pirate" />
-        <h3>{name}</h3>
-        <ul>
-          <li>Died: {year}</li>
-          <li>Weapon: {weapon}</li>
-          <li>Vessel: {vessel}</li>
-        </ul>
-      </summary>
-      <article>
-        <h2>{tagline}</h2>
-        <p>{description}</p>
-        {/* PASS IT */}
-        <button onClick={() => removePirate(id)}>Remove Pirate</button>
-      </article>
-    </section>
-  );
-}
-```
-
-And test.
 
 ## Deploying
 
@@ -1565,29 +1392,3 @@ Add the following to `package.json`:
 
 Run `$ npm run build` on the command line and upload the build folder to the server of your choice.
 
-## Instructor Notes
-
-### Serverless Functions
-
-1. Install node-fetch, netlify-cli
-1. Heroku account - create and logout
-1. Hasura cloud account > Create free project > save api info > HASURA_API_URL, ADMIN_ADMIN_SECRET
-1. Launch console > Data > create free database > pirates and recreate a pirate data schema
-1. Insert Row > add a pirate in the database
-1. Explore GraphQL
-
-<!-- https://pirates-test.hasura.app/v1/graphql -->
-<!-- VZnBFyR7zCjZWzNk5Q2PCqYsMmbI1fJXYsddmeRCG1qqa2U5Ub70ucd0bc1DBhy3 -->
-
-```js
-const pirates = require("../src/data/pirates.json");
-
-exports.handler = async () => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify(pirates),
-  };
-};
-```
-
----
