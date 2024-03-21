@@ -12,10 +12,9 @@ const nums = [1, 2, 3, 4, 5];
 // console.log(nums);
 
 const user = {
-  username: "ddeverell",
+  username: "Deverell",
   firstName: "Daniel",
   lastName: "Deverell",
-  fullName: "D D",
 };
 
 // renaming a destructured variable

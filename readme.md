@@ -37,7 +37,7 @@ Today we will build this [minimal React site](http://react-pirates.netlify.app).
 
 ## Homework
 
-TBD.
+Provide buttons that filter (i.e. by date), sort (i.e. by name) and reduce (i.e. total years lived of all) the pirates and show the results in the UI.
 
 ## Suggested Reading
 
