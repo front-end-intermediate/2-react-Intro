@@ -25,8 +25,8 @@
   - [Resetting the Form](#resetting-the-form)
   - [Removing Pirates](#removing-pirates)
   - [Additional Form Fields](#additional-form-fields)
-  - [Persisting the data](#persisting-the-data)
-  - [JSON Server](#json-server)
+  - [Refactoring the Form](#refactoring-the-form)
+  - [Persisting the data with JSON Server](#persisting-the-data-with-json-server)
   - [Deploying](#deploying)
 
 
@@ -1003,15 +1003,15 @@ We'll use the first input field as an example. Add:
 - an `onChange` property that calls a function whenever the user enters information
 
 ```js
-const [pirateName, setPirateName] = React.useState("");
+const [name, setName] = React.useState("");
 ...
-<label htmlFor="pirateName">Name</label>
+<label htmlFor="name">Name</label>
 <input
-  id="pirateName"
+  id="name"
   type="text"
   placeholder="Pirate name"
-  value={pirateName}
-  onChange={(event) => setPirateName(event.target.value)}
+  value={name}
+  onChange={(event) => setName(event.target.value)}
 />
 ```
 
@@ -1025,7 +1025,7 @@ Create a pirate object in `AddPirate`'s `createPirate` function.
 const createPirate = (event) => {
   event.preventDefault();
   const pirate = {
-    name: pirateName,
+    name: name,
   };
   console.log(pirate);
 };
@@ -1040,13 +1040,13 @@ Add vessel and weapon to the form
   const [weapon, setWeapon] = React.useState("");
   ...
 <form onSubmit={createPirate}>
-  <label htmlFor="pirateName">Name</label>
+  <label htmlFor="name">Name</label>
   <input
-    id="pirateName"
+    id="name"
     type="text"
     placeholder="Pirate name"
-    value={pirateName}
-    onChange={(event) => setPirateName(event.target.value)}
+    value={name}
+    onChange={(event) => setName(event.target.value)}
   />
   <label htmlFor="vessel">Vessel</label>
   <input
@@ -1074,7 +1074,7 @@ Add them to the createPirate function:
 const createPirate = (event) => {
   event.preventDefault();
   const pirate = {
-    name: pirateName,
+    name: name,
     vessel: vessel,
     weapon: weapon,
   };
@@ -1126,7 +1126,7 @@ and call the function:
 const createPirate = (event) => {
   event.preventDefault();
   const pirate = {
-    name: pirateName,
+    name: name,
     vessel: vessel,
     weapon: weapon,
   };
@@ -1203,14 +1203,14 @@ const createPirate = (event) => {
   event.preventDefault();
 
   const pirate = {
-    name: pirateName,
+    name: name,
     vessel: vessel,
     weapon: weapon,
   };
 
   addPirate(pirate);
 
-  setPirateName("");
+  setName("");
   setVessel("");
   setWeapon("");
 };
@@ -1305,14 +1305,12 @@ Note that we are now passing a parameter to the function: `removePirate(name)` a
 Add a filter to the function in App.js:
 
 ```js
-const removePirate = (pirateName) => {
-  const newPirates = pirates.filter((pirate) => pirate.name !== pirateName);
+const removePirate = (name) => {
+  const newPirates = pirates.filter((pirate) => pirate.name !== name);
   setPirates(newPirates);
   // setPirates([...newPirates]);
 };
 ```
-
-
 
 ---
 
@@ -1332,14 +1330,14 @@ In AddPirateForm.js:
   event.preventDefault();
 
   const pirate = {
-    name: pirateName,
+    name: name,
     vessel: vessel,
     weapon: weapon,
     death: death,
     desc: desc
   };
   addPirate(pirate);
-  setPirateName("");
+  setName("");
   setVessel("");
   setWeapon("");
   setDeath("");
@@ -1366,9 +1364,119 @@ In AddPirateForm.js:
   <Button text={"Add Pirate"} />
 ```
 
-## Persisting the data
+## Refactoring the Form
 
-## JSON Server
+```js
+const initialFormState = {
+ name: "",
+ vessel: "",
+ weapon: "",
+ death: "",
+ desc: "",
+};
+
+const [pirate, setPirate] = React.useState(initialFormState);
+```
+
+Change all values and add a name attribute e.g.:
+
+```js
+value={pirate.name}
+name="name"
+```
+
+Refactor the `createPirate` function to use the new state object:
+
+```js
+const handleInputChange = (event) => {
+ const { name, value } = event.target;
+ setPirate({ ...pirate, [name]: value });
+};
+```
+
+The final form:
+
+```js
+import React from "react";
+import "../assets/css/AddPirateForm.css";
+import Button from "./Button";
+
+const AddPirate = ({ addPirate }) => {
+  const initialFormState = {
+    name: "",
+    vessel: "",
+    weapon: "",
+    year: "",
+    desc: "",
+  };
+  const [pirate, setPirate] = React.useState(initialFormState);
+
+  const createPirate = (event) => {
+    event.preventDefault();
+    addPirate(pirate);
+    setPirate(initialFormState);
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setPirate({ ...pirate, [name]: value });
+  };
+
+  return (
+    <form onSubmit={createPirate}>
+      <label htmlFor="name">Name</label>
+      <input
+        id="name"
+        type="text"
+        placeholder="Pirate name"
+        name="name"
+        value={pirate.name}
+        onChange={handleInputChange}
+      />
+      <label htmlFor="vessel">Vessel</label>
+      <input
+        id="vessel"
+        type="text"
+        placeholder="Pirate vessel"
+        name="vessel"
+        value={pirate.vessel}
+        onChange={handleInputChange}
+      />
+      <label htmlFor="weapon">Weapon</label>
+      <input
+        id="weapon"
+        type="text"
+        name="weapon"
+        placeholder="Pirate weapon"
+        value={pirate.weapon}
+        onChange={handleInputChange}
+      />
+      <label htmlFor="died">Died</label>
+      <input
+        id="died"
+        type="text"
+        name="year"
+        placeholder="Year of death"
+        value={pirate.year}
+        onChange={handleInputChange}
+      />
+      <label htmlFor="desc">Description</label>
+      <textarea
+        id="desc"
+        name="desc"
+        placeholder="Pirate description"
+        value={pirate.desc}
+        onChange={handleInputChange}
+      />
+      <Button text={"Add Pirate"} />
+    </form>
+  );
+};
+
+export default AddPirate;
+```
+
+## Persisting the data with JSON Server
 
 Add a new package to the project:
 
@@ -1385,14 +1493,16 @@ Add a script in `package.json`:
 Add the pirates.json file from the reference directory to the root of the project and run the server in a second terminal.
 
 ```js
-  React.useEffect(() => {
-    fetch("http://localhost:3001/pirates")
-      .then((res) => res.json())
-      .then((data) => {
-        setPirates(data);
-      });
-  }, []);
-  ```
+React.useEffect(() => {
+ fetch("http://localhost:3001/pirates")
+   .then((res) => res.json())
+   .then((data) => {
+     setPirates(data);
+   });
+}, []);
+```
+
+Test adding a pirate.
 
 ## Deploying
 
