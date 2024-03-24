@@ -18,9 +18,8 @@
   - [Convert the Pirate component to a standalone component](#convert-the-pirate-component-to-a-standalone-component)
   - [Aside: Class Components](#aside-class-components)
   - [Rendering Multiple Components](#rendering-multiple-components)
-  - [State](#state)
+  - [State and the `useState` Hook](#state-and-the-usestate-hook)
   - [React Forms](#react-forms)
-  - [React Forms](#react-forms-1)
   - [Pirates State](#pirates-state)
     - [Passing a Function as a Prop](#passing-a-function-as-a-prop)
   - [Resetting the Form](#resetting-the-form)
@@ -393,7 +392,6 @@ import logo from "../assets/img/anchor.svg";
 Import Header and render it to the DOM via App.js while passing it a title prop:
 
 ```js
-import React from "react";
 import Header from "./components/Header";
 
 function App() {
@@ -404,12 +402,6 @@ function App() {
     </div>
   );
 }
-
-function Pirate({ tagline }) {
-  return <p>{tagline}</p>;
-}
-
-export default App;
 ```
 
 Use the title prop:
@@ -471,7 +463,7 @@ function App() {
 }
 ```
 
-Note: it would be more common to see an arrow function being employed.
+Note: it would be common to see an arrow function being employed.
 
 Change the randomize function:
 
@@ -480,7 +472,7 @@ const randomize = () =>
   pirateCalls[Math.floor(Math.random() * pirateCalls.length)];
 ```
 
-Note: by declaring the function as a variable we are creating a [function expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function#function_declaration_hoisting).
+Note: by declaring the function as a variable we are creating a [function expression](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function#function_declaration_hoisting). Using the `function` keyword would create a [function declaration](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function#function_expression).
 
 ## Importing and Exporting Components
 
@@ -522,7 +514,7 @@ var arrayTotal = arr.reduce(function (total, amount) {
 console.log(arrayTotal);
 ```
 
-The above refactored:
+The above refactored to use arrow functions and ES6 syntax:
 
 ```js
 var arr = [1, 2, 3];
@@ -546,7 +538,6 @@ console.log(arrayTotal);
 In `src/components/Pirate.js`:
 
 ```js
-import React from "react";
 import "../assets/css/Pirate.css";
 
 function Pirate(props) {
@@ -563,9 +554,8 @@ export default Pirate;
 Use the component in `App.js` by first importing it and then returning it:
 
 ```js
-import React from "react";
-import Header from "./components/Header";
-import Pirate from "./components/Pirate";
+import Header from "./Header";
+import Pirate from "./Pirate";
 
 const pirateCalls = [
   "Aaarg, belay that!",
@@ -595,7 +585,7 @@ There is an older component type called a class component. We will focus on func
 Here is a comparison between and functional component and a class component:
 
 ```js
-function PirateFunc(props) {
+function Pirate(props) {
   return (
     <section>
       <p>Favorite saying: {props.tagline}</p>
@@ -603,7 +593,7 @@ function PirateFunc(props) {
   );
 }
 
-class PirateClass extends React.Component {
+class Pirate extends React.Component {
   render() {
     return (
       <section>
@@ -614,11 +604,11 @@ class PirateClass extends React.Component {
 }
 ```
 
-Note the render method and `this` in the paragraph. The JavaScript `this` keyword refers to the object it belongs to. Confusion around 'this' and the class-flavored syntax is a major reason the React team moved away from class to function components.
+Note the render method and `this` in the paragraph. The JavaScript `this` keyword refers to the object it belongs to. Confusion around 'this' and the class-flavored syntax is one reason the React team moved away from class to function components.
 
 A functional component is just a plain JavaScript function which accepts props as an argument and returns a React element. A class component requires you to extend from `React.Component` and create a render function which returns a React element.
 
-You should be familiar with class components - they have been the primary method of working in React for many years. Many older posts, articles, and even the current React documentation use the class syntax.
+You should be familiar with class components - they were the primary method of working in React for many years and many older tutorials, articles, and React documentation refer to the class syntax.
 
 ## Rendering Multiple Components
 
@@ -627,6 +617,8 @@ Import an array of sample pirates into `App.js` and open the file in the editor 
 ```js
 import piratesFile from "./data/sample-pirates-array";
 ```
+
+<!-- Note: the file exports pirates, not piratesArray. -->
 
 In `App.js` create multiple pirates using `.map()`:
 
@@ -679,11 +671,15 @@ Note the browser console warning: "Each child in a list should have a unique "ke
 
 Review keys in the [React](https://reactjs.org/docs/lists-and-keys.html#keys) documentation.
 
-Use the pirates name as a unique id in `App.js`:
+Use the optional `index` argument for `.map` as the pirates key in `App.js` :
 
 ```js
-<Pirate key={pirate.name} tagline={randomize()} name={pirate.name} />
+{piratesFile.map((pirate, index) => (
+  <Pirate key={index} tagline={randomize()} name={pirate.name} />
+))}
 ```
+
+Note: using the index might be a bad practice if we were to change the order of the array. 
 
 In App.js, instead of passing just the name (`name={pirate.name}`) we will pass the entire pirate object (`pirate={pirate}`):
 
@@ -693,8 +689,8 @@ function App() {
     <div>
       <Header title={randomize()} />
       <div className="pirate">
-        {piratesFile.map((pirate) => (
-          <Pirate key={pirate.name} tagline={randomize()} pirate={pirate} />
+        {piratesFile.map((pirate, index) => (
+          <Pirate key={index} tagline={randomize()} pirate={pirate} />
         ))}
       </div>
     </div>
@@ -702,7 +698,7 @@ function App() {
 }
 ```
 
-Note that the name disappears in the UI but we do not get an error.
+Note that the name disappears in the UI but we do not get an error. If a prop is not used in the component it is ignored.
 
 Correct it with:
 
@@ -719,7 +715,7 @@ function Pirate(props) {
 
 ---
 
-## State
+## State and the `useState` Hook
 
 State is data at a particular moment in time. It’s the current “state” of your data.
 
@@ -735,38 +731,40 @@ Under the hood React uses a virtual DOM to invisibly render components. Then it 
 - props are external and controlled by whatever component renders the component
 - props always flow down the document tree, never up
 
-We will be using React hooks to manage state in our app.
+We will be using [React Hooks](https://reactjs.org/docs/hooks-intro.html) to manage state in our app.
 
-`ussState` returns an array with two elements which we destructure into two variables. The first being the data and the second a function to update the data.
+Hooks are functions that let you "hook into" React state and lifecycle features from function components. There are several built-in hooks in React, including:
 
-Create a the following as `State.jsx` in the components directory:
+- `useState`: This hook lets you add React state to function components.
+- `useEffect`: This hook lets you perform side effects in function components.
+- `useContext`: This hook lets you subscribe to React context without introducing nesting.
+
+Calling `React.useState` returns an array with two elements which we destructure into two variables. The first being the data and the second a function to update the data. 
+
+Add the following to `App.js`, compose and test it:
 
 ```js
-import React from "react";
+import { useState } from 'react';
+// import React from "react";
 
-export default function Test() {
-  // HERE
-  const [steps, setSteps] = React.useState(0);
-
-  // unlike our randomize function this needs to be inside the component definition
-  function increment() {
-    setSteps((steps) => steps + 1);
-  }
+function Example() {
+  // Declare a new state variable, which we'll call "count"
+  const [count, setCount] = useState(0);
 
   return (
     <div>
-      Today you've taken {steps} steps!
-      <br />
-      {/* Note: not increment() */}
-      <button onClick={increment}>I took another step</button>
+      <p>You clicked {count} times</p>
+      <button onClick={() => setCount(count + 1)}>
+        Click me
+      </button>
     </div>
   );
 }
 ```
 
-Import it into App and compose it.
+Note the `onClick` event handler and the arrow function. We do not add an event listener to the button, React does this for us.
 
----
+Create a piece of state in `App.js` and initialize it with the piratesFile:
 
 ```js
 function App() {
@@ -843,32 +841,6 @@ function Pirate(props) {
 }
 ```
 
-Edit Pirate.css:
-
-```css
-.pirate {
-  max-width: 80vw;
-  margin: 2rem auto;
-}
-
-h2 {
-  font-family: "Trade Winds", cursive;
-}
-
-section {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px dotted black;
-  margin-bottom: 1rem;
-}
-
-article {
-  flex: 1;
-}
-```
-
 Refine the destructuring:
 
 ```js
@@ -886,6 +858,32 @@ function Pirate({
   tagline,
 }) {
 ...
+}
+```
+
+Edit Pirate.css:
+
+```css
+section {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dotted black;
+  margin-bottom: 1rem;
+}
+
+summary ul {
+  padding: 0;
+}
+
+.pirate {
+  max-width: 80vw;
+  margin: 2rem auto;
+}
+
+h2 {
+  font-family: "Trade Winds", cursive;
 }
 ```
 
@@ -925,7 +923,6 @@ But we would need to copy the asset into public in order for the link to functio
 Create a new component `AddPirate.js` in the components folder:
 
 ```js
-import React from "react";
 import "../assets/css/AddPirateForm.css";
 
 const AddPirate = () => {
@@ -945,7 +942,7 @@ export default AddPirate;
 Import AddPirate and compose it in `App.js`:
 
 ```js
-import AddPirate from "./components/AddPirate";
+import AddPirate from "./AddPirate";
 ...
 function App() {
    const [pirates, setPirates] = React.useState(piratesFile);
@@ -980,7 +977,7 @@ function createPirate(event) {
 }
 ```
 
-Add an onSubmit handler to the AddPirate component:
+Add an `onSubmit` handler to the AddPirate component:
 
 ```js
 const AddPirate = () => {
@@ -997,17 +994,13 @@ const AddPirate = () => {
 
 Click on the Add Pirate button to test.
 
----
-
-## React Forms
-
-Using the first input field as an exemplar, Add:
+We'll use the first input field as an example. Add:
 
 - state to store the pirate name,
 - a label with `htmlFor`,
-- an input id that matches the value of htmlFor,
+- an input id that matches the value of `htmlFor`,
 - a value attribute that displays the pirate name
-- an onChange property that runs a function when the user enters information
+- an `onChange` property that calls a function whenever the user enters information
 
 ```js
 const [pirateName, setPirateName] = React.useState("");
@@ -1160,7 +1153,7 @@ const addPirate = (pirate) => {
 };
 ```
 
-And test by adding a new pirate.
+Test by adding a new pirate and view the results in React's devtool.
 
 The `Array.unshift()` method adds an element to the beginning of an array.
 
@@ -1184,7 +1177,9 @@ const addPirate = (pirate) => {
 };
 ```
 
-Another, even more concise function, uses a variable `prev` - setPirates has access to previous state.
+Another, even more concise function, uses a variable `prev` - setPirates has access to previous state. 
+
+When updating state based on its previous value, you to pass a function to the setter function that updates the state. This function receives the previous state value as an argument and returns the new state value
 
 ```js
 const addPirate = (pirate) => {
@@ -1253,7 +1248,22 @@ Since we are going to create a delete button in each Pirate instance, we'll pass
 </div>
 ```
 
-Add a button to the `Pirate` component after the description and destructure the new prop:
+Create a button component.
+
+```js
+import React from 'react';
+
+function Button({ text, onClick }) {
+  return (
+    <button onClick={onClick}>{text}</button>
+  );
+}
+
+export default Button
+```
+      
+
+Import and add an instance of the button to the `Pirate` component after the description and destructure the new prop:
 
 ```js
 function Pirate({
@@ -1275,7 +1285,7 @@ function Pirate({
       <article>
         <h2>{tagline}</h2>
         <p>{desc}</p>
-        <button onClick={removePirate}>Remove Pirate</button>
+        <Button onClick={removePirate} text="Remove Pirate" />
       </article>
     </section>
   );
@@ -1287,10 +1297,10 @@ Test the button to ensure everything is wired correctly.
 In `Pirate.js`:
 
 ```js
-<button onClick={() => removePirate(name)}>Remove Pirate</button>
+<Button onClick={() => removePirate(name)} text="Remove Pirate" />
 ```
 
-Note that we are now passing a parameter to the function: `removePirate(name)` and we are using an arrow function: `() => removePirate(name)`. What would happen if we didn't use the function form and just used `removePirate(name)`?
+Note that we are now passing a parameter to the function: `removePirate(name)` and we are using an arrow function: `() => removePirate(name)`.
 
 Add a filter to the function in App.js:
 
@@ -1301,6 +1311,8 @@ const removePirate = (pirateName) => {
   // setPirates([...newPirates]);
 };
 ```
+
+
 
 ---
 
@@ -1350,6 +1362,8 @@ In AddPirateForm.js:
     value={desc}
     onChange={(event) => setDesc(event.target.value)}
   />
+  // use the Button component
+  <Button text={"Add Pirate"} />
 ```
 
 ## Persisting the data
